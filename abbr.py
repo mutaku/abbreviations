@@ -24,10 +24,11 @@ class Document():
         # Setup database-specific parsing
         # As additional database are used we can add
         # them here and no other code needs changed
+        # Be sure to escape delimiters like \\t for \t
         self.parsers = {
                 "adam": {
                     'engine': parsers.adam,
-                    'delimiter': '\t'},
+                    'delimiter': '\\t'},
                     }
 
     def opener(self):
