@@ -1,16 +1,26 @@
 import zipfile
 import re
 import itertools
-
+from tools import plurals
+import parsers
 
 class Document():
     '''
     Handles DOCX files for searching abbreviations.
+    Parses doc_file to find abbreviations used and then
+    looks up long form/definition in given database file.
     '''
-    def __init__(self, doc, database):
-        self.doc = doc
-        self.database = database
-        self.content = self.parse()
+    def __init__(self, doc_file, db_file, db_type="adam"):
+        self.doc = doc_file
+        self.database = db_file
+        self.db_type = db_type # defaults to ADAM
+        self.content = self.read()
+        
+        # Setup database-specific parsing
+        # As additional database are used we can add
+        # them here and no other code needs changed
+        self.parsers = {
+            "adam": parsers.adam,}
         
     def opener(self):
         '''
@@ -27,9 +37,9 @@ class Document():
         # Sub out XML junk
         return re.sub("<(.|\n)*?>", " ", data)
     
-    def parse(self):
+    def read(self):
         '''
-        Parses DOCX XML file for text content.
+        Reads DOCX XML file for text content.
         '''
         # Get XML content and pass through the cleaner
         xml_content = self.opener()
@@ -41,13 +51,15 @@ class Document():
         '''
         # Find (abbr) structured items
         # Ignore only digits as they are references
+        # We pull out only the internal text 'abbr' of (abbr)
         abbrs = re.compile("\((?P<abb>\d*[a-z]\w*)\)",
                            re.DOTALL|re.IGNORECASE|re.MULTILINE)
         # Get all matches
-        # Let's also try to make some singular forms
+        # Run results through plurals tool to try and
+        # get possible singular forms of an abbreviation
+        # Use itertools.chain to flatten out nested lists
         chain = itertools.chain(
-            *[[x] if not x.endswith('s') else [x, x[:-1]]
-                for x in abbrs.findall(self.content)])
+            *[plurals(x) for x in abbrs.findall(self.content)])
         return list(chain)
 
     def import_database(self):
@@ -72,7 +84,12 @@ class Document():
         # GEF would match GEF and GEFS and so on
         matches = dict()
         for abbr in self.find_abbr():
-            matches[abbr] = re.findall("^%s.*?\\n" % abbr,
+            # Return the entire line starting with abbr
+            # and ending at the newline character
+            # This is our custom "grep"
+            results = re.findall("^%s.*?\\n" % abbr,
                                     self.content,
                                     re.MULTILINE|re.IGNORECASE)
+            # Pass results through database-specific parser
+            matches[abbr] = self.parsers[self.db_type](results)
         return matches
