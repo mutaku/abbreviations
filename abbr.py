@@ -92,5 +92,7 @@ class Document():
                                     self.abbreviations,
                                     re.MULTILINE|re.IGNORECASE)
             # Pass results through database-specific parser
+            # This will be a list of dictionaries since we
+            # sort the results based on score before returning
             matches[abbr] = self.parsers[self.db_type](results)
         return matches
