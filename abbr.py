@@ -10,9 +10,14 @@ class Document():
     Parses doc_file to find abbreviations used and then
     looks up long form/definition in given database file.
     '''
-    def __init__(self, doc_file, db_file, db_type="adam"):
+    def __init__(self,
+                 doc_file,
+                 db_file,
+                 db_type="adam",
+                 permissive=False):
         self.doc = doc_file
         self.database = db_file
+        self.permissive = permissive # defaults to False
         self.db_type = db_type # defaults to ADAM
         self.content = self.read()
         
@@ -81,20 +86,30 @@ class Document():
         # Builds "abbreviation": [list of potential entries]
         # We can later iterate over each abbreviations possible
         # entries and provide them to the user to select from
-        # Current search looks for minimum start:
-        # GEF would match GEF and GEFS and so on
         matches = dict()
         for abbr in self.find_abbr():
             # Return the entire line starting with abbr
             # and ending at the newline character
             # This is our custom "grep"
-            results = re.findall("^%s.*?\\n" % abbr,
+            # If we are permissive, we grab entire line
+            # with a minimum start:
+            # GEF would match GEF and GEFS and so on
+            if self.permissive:
+                search_string = "^%s.*?\\n"
+            # If we do not want permissive matching, we
+            # only find entries with tab character directly
+            # following our abbr string
+            else:
+                search_string = "^%s\\t.*?\\n"
+            # Now we run our search based on our inclusivity
+            results = re.findall(search_string % abbr,
                                     self.abbreviations,
                                     re.MULTILINE|re.IGNORECASE)
             # Pass results through database-specific parser
             # This will be a list of dictionaries since we
             # sort the results based on score before returning
-            matches[abbr] = self.parsers[self.db_type](results)
+            if results:
+                matches[abbr] = self.parsers[self.db_type](results)
         return matches
     
     def get_top(self, abbr_match):
