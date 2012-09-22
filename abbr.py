@@ -60,7 +60,8 @@ class Document():
         # Use itertools.chain to flatten out nested lists
         chain = itertools.chain(
             *[plurals(x) for x in abbrs.findall(self.content)])
-        return list(chain)
+        # Pass through set to remove duplicates
+        return list(set(chain))
 
     def import_database(self):
         '''
@@ -88,7 +89,7 @@ class Document():
             # and ending at the newline character
             # This is our custom "grep"
             results = re.findall("^%s.*?\\n" % abbr,
-                                    self.content,
+                                    self.abbreviations,
                                     re.MULTILINE|re.IGNORECASE)
             # Pass results through database-specific parser
             matches[abbr] = self.parsers[self.db_type](results)

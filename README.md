@@ -28,11 +28,11 @@ all_results = doc.search_database()
 all_results.keys()
 
 # Iterate over matches in MEDLINE database for an abbreviation
-for match in all_results['DMSO']:
+for match in all_results['DMSO'].items():
     print match
 
 # Suck out only specific parsed data from results
-for match in all_results['DMSO']:
+for k, match in all_results['DMSO'].items():
     print "abbr: %s -> %s" % (match['abbr'], match['def'])
 
 ```

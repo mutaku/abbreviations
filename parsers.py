@@ -23,4 +23,7 @@ def adam(abbr):
             'def': match[2],
             'score': match[3],
             'count': match[4]}
-    return results
+    # Let us sort the results by score (highest first)
+    return sorted(results.iteritems(),
+                  key=lambda (k, v): v['score'],
+                  reverse=True)
