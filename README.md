@@ -15,7 +15,8 @@ from abbreviations import abbr
 
 # Initiate manuscript
 doc = abbr.Document("location/of/manuscript.docx",
-        "location/of/adam_database")
+        "location/of/adam_database".
+        "adam")
 
 # Load up our database
 doc.import_database()
@@ -29,4 +30,9 @@ all_results.keys()
 # Iterate over matches in MEDLINE database for an abbreviation
 for match in all_results['DMSO']:
     print match
+
+# Suck out only specific parsed data from results
+for match in all_results['DMSO']:
+    print "abbr: %s -> %s" % (match['abbr'], match['def'])
+
 ```
