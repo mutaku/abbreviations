@@ -108,8 +108,7 @@ class Document():
             # Pass results through database-specific parser
             # This will be a list of dictionaries since we
             # sort the results based on score before returning
-            if results:
-                matches[abbr] = self.parsers[self.db_type](results)
+            matches[abbr] = self.parsers[self.db_type](results)
         return matches
     
     def get_top(self, abbr_match):
