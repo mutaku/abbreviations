@@ -20,13 +20,17 @@ class Document():
         self.permissive = permissive # defaults to False
         self.db_type = db_type # defaults to ADAM
         self.content = self.read()
-        
+
         # Setup database-specific parsing
         # As additional database are used we can add
         # them here and no other code needs changed
+        # Be sure to escape delimiters like \\t for \t
         self.parsers = {
-            "adam": parsers.adam,}
-        
+                "adam": {
+                    'engine': parsers.adam,
+                    'delimiter': '\\t'},
+                    }
+
     def opener(self):
         '''
         Opens DOCX XML file.
@@ -34,14 +38,14 @@ class Document():
         # Unzip DOCX and return the xml file
         file_obj = zipfile.ZipFile(self.doc)
         return file_obj.read('word/document.xml')
-    
+
     def cleanup(self, data):
         '''
         Substitutes garbage chars for a whitespace.
         '''
         # Sub out XML junk
         return re.sub("<(.|\n)*?>", " ", data)
-    
+
     def read(self):
         '''
         Reads DOCX XML file for text content.
@@ -97,10 +101,11 @@ class Document():
             if self.permissive:
                 search_string = "^%s.*?\\n"
             # If we do not want permissive matching, we
-            # only find entries with tab character directly
+            # only find entries with delimiter directly
             # following our abbr string
             else:
-                search_string = "^%s\\t.*?\\n"
+                delimiter = self.parsers[self.db_type]['delimiter']
+                search_string = "^%s" + delimiter + ".*?\\n"
             # Now we run our search based on our inclusivity
             results = re.findall(search_string % abbr,
                                     self.abbreviations,
@@ -108,9 +113,9 @@ class Document():
             # Pass results through database-specific parser
             # This will be a list of dictionaries since we
             # sort the results based on score before returning
-            matches[abbr] = self.parsers[self.db_type](results)
+            matches[abbr] = self.parsers[self.db_type]['engine'](results)
         return matches
-    
+
     def get_top(self, abbr_match):
         '''
         Sucks out the top result based on score from an
