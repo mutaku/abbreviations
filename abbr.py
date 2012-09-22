@@ -98,4 +98,10 @@ class Document():
         return matches
     
     def get_top(self, abbr_match):
+        '''
+        Sucks out the top result based on score from an
+        abbreviation match list.
+        '''
+        # First result is the highest score and we return
+        # the result parameter dictionary
         return abbr_match[0][1]
