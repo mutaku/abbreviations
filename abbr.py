@@ -1,9 +1,3 @@
-# ADAM abbreviations database from:
-# Zhou W, Torvik VI, Smalheiser NR.
-# ADAM: another database of abbreviations in MEDLINE.
-# Bioinformatics 2006; 22(22): 2813-2818.
-# See for me information:
-# http://arrowsmith.psych.uic.edu/arrowsmith_uic/adam.html
 import zipfile
 import re
 import itertools
