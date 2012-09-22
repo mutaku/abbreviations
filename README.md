@@ -35,4 +35,10 @@ for match in all_results['DMSO'].items():
 for k, match in all_results['DMSO'].items():
     print "abbr: %s -> %s" % (match['abbr'], match['def'])
 
+# Grab the top result from an abbreviation match
+top_dmso = doc.get_top(all_results['DMSO'])
+
+# Definition of the top result
+top_dmso['def']
+
 ```

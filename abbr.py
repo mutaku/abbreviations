@@ -96,3 +96,6 @@ class Document():
             # sort the results based on score before returning
             matches[abbr] = self.parsers[self.db_type](results)
         return matches
+    
+    def get_top(self, abbr_match):
+        return abbr_match[0][1]
